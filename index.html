@@ -118,7 +118,8 @@ h1 { font-family: var(--display); font-weight: 400; font-size: clamp(30px, 8vw, 
 .win h2 { font-family: var(--display); font-weight: 400; font-size: 36px; margin: 0; color: var(--saffron-ink); }
 .win .prize { font-size: 20px; margin: 0; line-height: 1.4; }
 .win .prize b { color: var(--rose); }
-.timer { font-family: var(--display); font-size: 48px; font-variant-numeric: tabular-nums; color: var(--rose); }
+.quote { margin: 0; font-family: var(--display); font-size: 18px; line-height: 1.5; color: var(--fg); padding: 14px 16px; border-radius: 12px; background: color-mix(in srgb, var(--rose) 10%, transparent); text-wrap: pretty; }
+a.btn { text-decoration: none; display: inline-block; }
 .fine { font-size: 12px; color: var(--muted); margin: 0; }
 .win-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .btn.kiss { background: var(--rose); }
@@ -147,10 +148,10 @@ canvas#fx { position: fixed; inset: 0; pointer-events: none; z-index: 30; width:
   <div class="win-box" role="dialog" aria-labelledby="winTitle">
     <h2 id="winTitle">¡Perfecto!</h2>
     <p class="prize">Dominaste los cuatro elementos y mi corazón.<br>Tu premio es <b>besarnos media hora</b> 💋</p>
-    <div class="timer" id="timer">30:00</div>
-    <p class="fine" id="fine">Válido hoy, mañana y siempre. No es transferible. Aplican besos extra.</p>
+    <blockquote class="quote">“Aang no puede vivir sin el aire, y yo no puedo vivir sin ti. Eres mi elemento favorito, el que nunca tuve que aprender a dominar porque siempre fue parte de mí.”</blockquote>
+    <p class="fine">Válido hoy, mañana y siempre. No es transferible. Aplican besos extra.</p>
     <div class="win-actions">
-      <button class="btn kiss" id="startKiss" type="button">Empezar los besos</button>
+      <a class="btn kiss" id="song" href="https://www.youtube.com/results?search_query=Man%C3%A1+Vivir+sin+aire" target="_blank" rel="noopener">🎵 Nuestra canción</a>
       <button class="btn ghost" id="again" type="button">Jugar otra vez</button>
     </div>
   </div>
@@ -178,16 +179,15 @@ const MISS = [
 ];
 
 const $ = id => document.getElementById(id);
-let first = null, lock = false, moves = 0, pairs = 0, tick = null;
+let first = null, lock = false, moves = 0, pairs = 0;
 
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function say(t) { const el = $("toast"); el.textContent = t; el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); setTimeout(() => el.classList.remove("pop"), 200); }
 
 function deal() {
-  clearInterval(tick); tick = null;
   first = null; lock = false; moves = 0; pairs = 0;
   $("moves").textContent = 0; $("pairs").textContent = 0;
-  $("win").hidden = true; $("timer").textContent = "30:00"; $("startKiss").textContent = "Empezar los besos"; $("startKiss").disabled = false;
+  $("win").hidden = true;
   say("Voltea dos cartas. Yip yip 🦬");
   const board = $("board"); board.innerHTML = "";
   shuffle([...CARDS, ...CARDS]).forEach((c, i) => {
@@ -222,26 +222,7 @@ function flip(b, c) {
   }
 }
 
-function win() { $("win").hidden = false; $("startKiss").focus(); hearts(); }
-
-function startKiss() {
-  if (tick) return;
-  let left = 30 * 60;
-  $("startKiss").textContent = "Besando… 💞"; $("startKiss").disabled = true;
-  $("fine").textContent = "Prohibido parar antes de que llegue a cero.";
-  tick = setInterval(() => {
-    left--;
-    const m = String(Math.floor(left / 60)).padStart(2, "0"), s = String(left % 60).padStart(2, "0");
-    $("timer").textContent = `${m}:${s}`;
-    if (left <= 0) {
-      clearInterval(tick); tick = null;
-      $("timer").textContent = "¡Bonus!";
-      $("fine").textContent = "Se acabó el tiempo… pero nadie dijo que no se pueda renovar.";
-      $("startKiss").textContent = "Otra media hora"; $("startKiss").disabled = false;
-      hearts();
-    }
-  }, 1000);
-}
+function win() { $("win").hidden = false; $("song").focus(); hearts(); }
 
 function hearts() {
   if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -263,7 +244,6 @@ function hearts() {
 
 $("restart").addEventListener("click", deal);
 $("again").addEventListener("click", deal);
-$("startKiss").addEventListener("click", startKiss);
 deal();
 </script>
 
